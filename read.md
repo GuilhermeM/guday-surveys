@@ -172,7 +172,7 @@ function doPost(e) {
 
 **Público-alvo:** Clientes (onboarding CRO)
 **Fonte:** `Guday - Client Survey.pdf`
-**Perguntas:** 24, organizadas em 4 seções com telas de transição
+**Perguntas:** 25, organizadas em 4 seções com telas de transição
 
 ### Histórico de alterações
 
@@ -180,13 +180,14 @@ function doPost(e) {
 |---|---|
 | 2026-03-17 | Criação inicial — 24 perguntas, 4 seções, integração com Sheets |
 | 2026-03-17 | Ajuste de copy na tela de boas-vindas (título e texto de introdução) |
+| 2026-03-17 | Nova pergunta em "Sobre competidores": nomeação de 3–5 marcas concorrentes (total: 25 perguntas) |
 
 ### Seções
 
 | Seção | Perguntas |
 |---|---|
 | Sobre você | 7 |
-| Sobre competidores | 4 |
+| Sobre competidores | 5 |
 | Sobre a sua audiência | 9 |
 | Sobre seu produto | 4 |
 
