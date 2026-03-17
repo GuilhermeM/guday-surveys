@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guday — Questionário de Suporte</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       VARIABLES
+    ============================================================ */
+    :root {
+      --purple:      #B282EB;
+      --purple-dark: #9965D8;
+      --purple-soft: #A78CEB;
+      --lime:        #C5FF89;
+      --dark:        #1E192A;
+      --muted:       #6D6DAA;
+      --bg:          #FAFAF2;
+      --white:       #ffffff;
+      --error:       #BE123C;
+      --error-bg:    #FFF1F2;
+      --border:      #DDD8F0;
+
+      --font: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --radius-btn: 0.5rem;
+      --radius-input: 3rem;
+      --shadow-btn: 0 6px 0 rgba(130, 80, 200, 0.25);
+      --transition: 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--dark);
+      overflow: hidden;
+    }
+
+    /* ============================================================
+       PROGRESS BAR
+    ============================================================ */
+    #progress-bar-wrap {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: var(--border);
+      z-index: 100;
+    }
+
+    #progress-bar {
+      height: 100%;
+      background: var(--purple);
+      transition: width var(--transition);
+      width: 0%;
+    }
+
+    /* ============================================================
+       LOGO
+    ============================================================ */
+    #logo-wrap {
+      position: fixed;
+      top: 1.25rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+    }
+
+    #logo-wrap svg {
+      height: 28px;
+      width: auto;
+    }
+
+    /* ============================================================
+       SCREEN CONTAINER
+    ============================================================ */
+    #quiz {
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5rem 1.5rem 6rem;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(40px);
+      transition: opacity var(--transition), transform var(--transition);
+    }
+
+    .screen.active {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateY(0);
+    }
+
+    .screen.exit-up {
+      opacity: 0;
+      transform: translateY(-40px);
+    }
+
+    .screen.exit-down {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+
+    /* ============================================================
+       CONTENT BOX
+    ============================================================ */
+    .content {
+      width: 100%;
+      max-width: 640px;
+    }
+
+    /* ============================================================
+       QUESTION NUMBER
+    ============================================================ */
+    .q-number {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .q-number svg {
+      width: 12px;
+      height: 12px;
+      fill: var(--purple);
+    }
+
+    /* ============================================================
+       QUESTION TEXT
+    ============================================================ */
+    .q-text {
+      font-size: clamp(1.25rem, 3vw, 1.75rem);
+      font-weight: 600;
+      line-height: 1.35;
+      margin-bottom: 0.5rem;
+      color: var(--dark);
+    }
+
+    .q-hint {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    /* ============================================================
+       TEXTAREA
+    ============================================================ */
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      border: 2px solid var(--border);
+      border-radius: 1rem;
+      padding: 1rem 1.25rem;
+      font-family: var(--font);
+      font-size: 1rem;
+      color: var(--dark);
+      background: var(--white);
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      line-height: 1.6;
+      overflow: hidden;
+    }
+
+    textarea:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 4px rgba(178, 130, 235, 0.15);
+    }
+
+    textarea.error {
+      border-color: var(--error);
+      box-shadow: 0 0 0 4px rgba(190, 18, 60, 0.1);
+    }
+
+    .field-error {
+      color: var(--error);
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    .field-error.visible {
+      display: block;
+    }
+
+    /* ============================================================
+       RADIO OPTIONS
+    ============================================================ */
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .option-label {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 1.25rem;
+      border: 2px solid var(--border);
+      border-radius: 0.75rem;
+      cursor: pointer;
+      background: var(--white);
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--dark);
+      user-select: none;
+    }
+
+    .option-label:hover {
+      border-color: var(--purple);
+      background: #F5F0FD;
+    }
+
+    .option-label input[type="radio"] {
+      display: none;
+    }
+
+    .option-label.selected {
+      border-color: var(--purple);
+      background: #F0E8FC;
+      box-shadow: 0 0 0 4px rgba(178, 130, 235, 0.12);
+    }
+
+    .option-key {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--muted);
+      flex-shrink: 0;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+
+    .option-label.selected .option-key {
+      border-color: var(--purple);
+      color: var(--white);
+      background: var(--purple);
+    }
+
+    /* ============================================================
+       BUTTONS
+    ============================================================ */
+    .btn-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.75rem 1.75rem;
+      border-radius: var(--radius-btn);
+      border: none;
+      font-family: var(--font);
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--purple);
+      color: var(--white);
+      box-shadow: var(--shadow-btn);
+    }
+
+    .btn-primary:hover {
+      background: var(--purple-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 rgba(130, 80, 200, 0.25);
+    }
+
+    .btn-primary:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 rgba(130, 80, 200, 0.25);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--muted);
+      border: 2px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--purple-soft);
+      color: var(--purple);
+    }
+
+    /* ============================================================
+       WELCOME SCREEN
+    ============================================================ */
+    #screen-welcome .content {
+      text-align: center;
+    }
+
+    .welcome-badge {
+      display: inline-block;
+      background: var(--lime);
+      color: var(--dark);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.9rem;
+      border-radius: 99px;
+      margin-bottom: 1.5rem;
+    }
+
+    #screen-welcome h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      color: var(--dark);
+    }
+
+    #screen-welcome h1 span {
+      color: var(--purple);
+    }
+
+    #screen-welcome p {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 420px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
+    }
+
+    /* ============================================================
+       THANK YOU SCREEN
+    ============================================================ */
+    #screen-thanks .content {
+      text-align: center;
+    }
+
+    .thanks-icon {
+      width: 72px;
+      height: 72px;
+      background: var(--lime);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      font-size: 2rem;
+    }
+
+    #screen-thanks h2 {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    #screen-thanks p {
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    /* ============================================================
+       ERROR SCREEN
+    ============================================================ */
+    #screen-error .content {
+      text-align: center;
+    }
+
+    .error-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    #screen-error h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--error);
+      margin-bottom: 0.5rem;
+    }
+
+    #screen-error p {
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    /* ============================================================
+       COUNTER LABEL (bottom)
+    ============================================================ */
+    #counter {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 500;
+      display: none;
+    }
+
+    /* ============================================================
+       LOADING STATE
+    ============================================================ */
+    .btn-primary.loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .btn-primary.loading::after {
+      content: '';
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media (max-width: 480px) {
+      .screen { padding: 5rem 1.25rem 5rem; }
+      .btn-row { flex-direction: column; }
+      .btn { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     PROGRESS BAR
+============================================================ -->
+<div id="progress-bar-wrap">
+  <div id="progress-bar"></div>
+</div>
+
+<!-- ============================================================
+     LOGO
+============================================================ -->
+<div id="logo-wrap">
+  <img src="https://guday.com.br/cdn/shop/files/logo-roxo.svg?v=1723934986&width=450" alt="Guday" style="height:48px;width:auto;display:block;" />
+</div>
+
+<!-- ============================================================
+     COUNTER
+============================================================ -->
+<div id="counter"></div>
+
+<!-- ============================================================
+     QUIZ
+============================================================ -->
+<div id="quiz">
+
+  <!-- WELCOME -->
+  <div class="screen active" id="screen-welcome">
+    <div class="content">
+      <div class="welcome-badge">Pesquisa Interna</div>
+      <h1>Questionário de<br/><span>Suporte ao Cliente</span></h1>
+      <p>Suas respostas ajudam a Guday a melhorar nosso atendimento e comunicação. Leva menos de 5 minutos.</p>
+      <button class="btn btn-primary" onclick="startQuiz()">
+        Começar
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- QUESTIONS (geradas via JS) -->
+
+  <!-- THANK YOU -->
+  <div class="screen" id="screen-thanks">
+    <div class="content">
+      <div class="thanks-icon">&#10003;</div>
+      <h2>Obrigado!</h2>
+      <p>Suas respostas foram enviadas com sucesso.<br/>A Guday agradece pela sua contribuição.</p>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="screen" id="screen-error">
+    <div class="content">
+      <div class="error-icon">&#9888;</div>
+      <h2>Falha no envio</h2>
+      <p>Não foi possível enviar suas respostas.<br/>Verifique sua conexão e tente novamente.</p>
+      <button class="btn btn-primary" onclick="retrySubmit()">Tentar novamente</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /* ============================================================
+     CONFIGURAÇÃO
+  ============================================================ */
+  const SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwGKVNvQfmielomrWN6ef7fiyErB8iGwpK7faOmZNomGAb1X7v85ewrJXpxXx66f4EdUQ/exec';
+
+  /* ============================================================
+     PERGUNTAS
+  ============================================================ */
+  const QUESTIONS = [
+    {
+      id: 'q1',
+      text: 'Quais são as principais reclamações que você recebe sobre o produto?',
+      hint: 'Descreva as queixas mais frequentes que os clientes relatam.',
+      type: 'textarea',
+      required: true,
+    },
+    {
+      id: 'q2',
+      text: 'Quais são os principais elogios sobre o site ou serviço?',
+      hint: 'Mencione os pontos positivos mais citados pelos clientes.',
+      type: 'textarea',
+      required: true,
+    },
+    {
+      id: 'q3',
+      text: 'Quais são as 3 principais dúvidas de clientes em potencial?',
+      hint: 'Liste as perguntas mais comuns feitas por quem ainda não comprou.',
+      type: 'textarea',
+      required: true,
+    },
+    {
+      id: 'q4',
+      text: 'O que você responde quando recebe essas dúvidas?',
+      hint: 'Descreva as respostas ou scripts que você costuma usar.',
+      type: 'textarea',
+      required: true,
+    },
+    {
+      id: 'q5_exists',
+      text: 'Existe um canal de atendimento telefônico para os clientes?',
+      hint: 'Selecione uma opção.',
+      type: 'radio',
+      required: true,
+      options: ['Sim, e está visível no site', 'Sim, mas não está no site', 'Não existe'],
+    },
+    {
+      id: 'q6',
+      text: 'Há aspectos da nossa oferta que os clientes não entendem bem?',
+      hint: 'Identifique pontos da comunicação ou do produto que geram confusão.',
+      type: 'textarea',
+      required: true,
+    },
+    {
+      id: 'q7',
+      text: 'O que os clientes mais gostam e mais reclamam da Guday?',
+      hint: 'Descreva os pontos mais elogiados e os mais criticados.',
+      type: 'textarea',
+      required: true,
+    },
+    {
+      id: 'q8',
+      text: 'Quais são as 3 principais reclamações de quem já comprou o produto?',
+      hint: 'Foco em pós-compra: o que incomoda quem já é cliente.',
+      type: 'textarea',
+      required: true,
+    },
+    {
+      id: 'q9',
+      text: 'O que leva os clientes a comprar? Existem grandes motivadores?',
+      hint: 'Descreva os principais gatilhos de decisão de compra.',
+      type: 'textarea',
+      required: true,
+    },
+    {
+      id: 'q10',
+      text: 'Se você tivesse 30 segundos para apresentar a Guday, o que diria?',
+      hint: 'Escreva livremente como descreveria a Guday para alguém que nunca ouviu falar.',
+      type: 'textarea',
+      required: true,
+    },
+    {
+      id: 'q11',
+      text: 'Ficou faltando algo? Tem algo importante a acrescentar?',
+      hint: 'Campo opcional — qualquer observação adicional é bem-vinda.',
+      type: 'textarea',
+      required: false,
+    },
+  ];
+
+  /* ============================================================
+     ESTADO
+  ============================================================ */
+  let currentScreen = 0; // 0 = welcome, 1..N = questions, N+1 = thanks, N+2 = error
+  let answers = {};
+  let lastAnswersForRetry = null;
+
+  const TOTAL_QUESTIONS = QUESTIONS.length;
+  const SCREEN_WELCOME = 0;
+  const SCREEN_FIRST_Q = 1;
+  const SCREEN_THANKS  = TOTAL_QUESTIONS + 1;
+  const SCREEN_ERROR   = TOTAL_QUESTIONS + 2;
+
+  /* ============================================================
+     BUILD QUESTION SCREENS
+  ============================================================ */
+  function buildQuestions() {
+    const quiz = document.getElementById('quiz');
+    const thanksEl = document.getElementById('screen-thanks');
+
+    QUESTIONS.forEach((q, idx) => {
+      const screenIdx = idx + 1;
+      const div = document.createElement('div');
+      div.className = 'screen';
+      div.id = `screen-q${screenIdx}`;
+      div.dataset.qidx = idx;
+
+      let fieldHTML = '';
+
+      if (q.type === 'textarea') {
+        fieldHTML = `
+          <textarea
+            id="field-${q.id}"
+            placeholder="Digite sua resposta aqui..."
+            rows="4"
+            oninput="autoResize(this)"
+          ></textarea>
+          <div class="field-error" id="err-${q.id}">Por favor, responda esta pergunta antes de continuar.</div>
+        `;
+      } else if (q.type === 'radio') {
+        const opts = q.options.map((opt, i) => `
+          <label class="option-label" onclick="selectOption('${q.id}', ${i}, this)">
+            <input type="radio" name="${q.id}" value="${opt}" />
+            <span class="option-key">${String.fromCharCode(65 + i)}</span>
+            <span>${opt}</span>
+          </label>
+        `).join('');
+        fieldHTML = `
+          <div class="options" id="field-${q.id}">${opts}</div>
+          <div class="field-error" id="err-${q.id}">Por favor, selecione uma opção.</div>
+        `;
+      }
+
+      const isFirst = screenIdx === 1;
+      const isLast  = screenIdx === TOTAL_QUESTIONS;
+
+      div.innerHTML = `
+        <div class="content">
+          <div class="q-number">
+            <svg viewBox="0 0 12 12"><polygon points="6,0 12,12 0,12"/></svg>
+            Pergunta ${screenIdx} de ${TOTAL_QUESTIONS}
+          </div>
+          <div class="q-text">${q.text}</div>
+          ${q.hint ? `<div class="q-hint">${q.hint}</div>` : ''}
+          ${fieldHTML}
+          <div class="btn-row">
+            ${isFirst ? '' : `<button class="btn btn-secondary" onclick="goBack()">&#8592; Anterior</button>`}
+            <button class="btn btn-primary" id="btn-next-${q.id}" onclick="${isLast ? 'submitQuiz()' : `goNext(${screenIdx})`}">
+              ${isLast ? 'Enviar' : 'Próximo'}
+              ${isLast ? '' : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`}
+            </button>
+          </div>
+        </div>
+      `;
+
+      quiz.insertBefore(div, thanksEl);
+    });
+  }
+
+  /* ============================================================
+     NAVIGATION
+  ============================================================ */
+  function getScreenEl(idx) {
+    if (idx === SCREEN_WELCOME) return document.getElementById('screen-welcome');
+    if (idx === SCREEN_THANKS)  return document.getElementById('screen-thanks');
+    if (idx === SCREEN_ERROR)   return document.getElementById('screen-error');
+    return document.getElementById(`screen-q${idx}`);
+  }
+
+  function goToScreen(nextIdx, direction = 'forward') {
+    const current = getScreenEl(currentScreen);
+    const next    = getScreenEl(nextIdx);
+
+    current.classList.remove('active');
+    current.classList.add(direction === 'forward' ? 'exit-up' : 'exit-down');
+
+    setTimeout(() => {
+      current.classList.remove('exit-up', 'exit-down');
+    }, 400);
+
+    next.classList.add('active');
+    currentScreen = nextIdx;
+    updateProgress();
+    updateCounter();
+
+    // Focus on textarea
+    const ta = next.querySelector('textarea');
+    if (ta) setTimeout(() => ta.focus(), 420);
+  }
+
+  function startQuiz() {
+    goToScreen(SCREEN_FIRST_Q);
+    document.getElementById('counter').style.display = 'block';
+  }
+
+  function goNext(screenIdx) {
+    const qIdx = screenIdx - 1;
+    const q    = QUESTIONS[qIdx];
+
+    if (!validateField(q)) return;
+    saveAnswer(q);
+    goToScreen(screenIdx + 1, 'forward');
+  }
+
+  function goBack() {
+    const qIdx = currentScreen - 1;
+    if (currentScreen <= SCREEN_FIRST_Q) return;
+    goToScreen(currentScreen - 1, 'backward');
+  }
+
+  /* ============================================================
+     VALIDATION & SAVE
+  ============================================================ */
+  function validateField(q) {
+    const errEl = document.getElementById(`err-${q.id}`);
+
+    if (!q.required) return true;
+
+    if (q.type === 'textarea') {
+      const ta = document.getElementById(`field-${q.id}`);
+      if (!ta.value.trim()) {
+        ta.classList.add('error');
+        errEl.classList.add('visible');
+        ta.focus();
+        return false;
+      }
+      ta.classList.remove('error');
+      errEl.classList.remove('visible');
+      return true;
+    }
+
+    if (q.type === 'radio') {
+      const selected = document.querySelector(`input[name="${q.id}"]:checked`);
+      if (!selected) {
+        errEl.classList.add('visible');
+        return false;
+      }
+      errEl.classList.remove('visible');
+      return true;
+    }
+
+    return true;
+  }
+
+  function saveAnswer(q) {
+    if (q.type === 'textarea') {
+      answers[q.id] = document.getElementById(`field-${q.id}`).value.trim();
+    } else if (q.type === 'radio') {
+      const sel = document.querySelector(`input[name="${q.id}"]:checked`);
+      answers[q.id] = sel ? sel.value : '';
+    }
+  }
+
+  function saveAllAnswers() {
+    QUESTIONS.forEach(q => saveAnswer(q));
+  }
+
+  /* ============================================================
+     SUBMIT
+  ============================================================ */
+  async function submitQuiz() {
+    const qIdx = currentScreen - 1;
+    const q    = QUESTIONS[qIdx];
+
+    if (!validateField(q)) return;
+    saveAllAnswers();
+
+    lastAnswersForRetry = { ...answers };
+
+    const btn = document.getElementById(`btn-next-${q.id}`);
+    btn.classList.add('loading');
+    btn.textContent = 'Enviando';
+
+    await sendToSheets(answers);
+  }
+
+  async function retrySubmit() {
+    if (!lastAnswersForRetry) return;
+    goToScreen(SCREEN_THANKS, 'forward');
+    await sendToSheets(lastAnswersForRetry);
+  }
+
+  async function sendToSheets(data) {
+    // Fallback: if endpoint not configured, log and show thanks
+    if (!SHEETS_ENDPOINT || SHEETS_ENDPOINT === 'COLE_AQUI_A_URL_DO_APPS_SCRIPT') {
+      console.warn('[Guday Quiz] SHEETS_ENDPOINT não configurado. Respostas:', data);
+      goToScreen(SCREEN_THANKS, 'forward');
+      document.getElementById('counter').style.display = 'none';
+      return;
+    }
+
+    try {
+      const res = await fetch(SHEETS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' }, // Apps Script requer text/plain para evitar preflight
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (json.status === 'ok') {
+        goToScreen(SCREEN_THANKS, 'forward');
+        document.getElementById('counter').style.display = 'none';
+      } else {
+        throw new Error('Status inesperado');
+      }
+    } catch (err) {
+      console.error('[Guday Quiz] Erro ao enviar:', err);
+      goToScreen(SCREEN_ERROR, 'forward');
+    }
+  }
+
+  /* ============================================================
+     PROGRESS & COUNTER
+  ============================================================ */
+  function updateProgress() {
+    const bar = document.getElementById('progress-bar');
+    if (currentScreen === SCREEN_WELCOME) {
+      bar.style.width = '0%';
+    } else if (currentScreen >= SCREEN_THANKS) {
+      bar.style.width = '100%';
+    } else {
+      const pct = ((currentScreen) / TOTAL_QUESTIONS) * 100;
+      bar.style.width = pct + '%';
+    }
+  }
+
+  function updateCounter() {
+    const el = document.getElementById('counter');
+    if (currentScreen >= SCREEN_FIRST_Q && currentScreen <= TOTAL_QUESTIONS) {
+      el.textContent = `${currentScreen} / ${TOTAL_QUESTIONS}`;
+    } else {
+      el.style.display = 'none';
+    }
+  }
+
+  /* ============================================================
+     HELPERS
+  ============================================================ */
+  function selectOption(qId, idx, label) {
+    const container = document.getElementById(`field-${qId}`);
+    container.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+    label.classList.add('selected');
+    label.querySelector('input').checked = true;
+    document.getElementById(`err-${qId}`).classList.remove('visible');
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+
+  /* ============================================================
+     KEYBOARD NAVIGATION
+  ============================================================ */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      if (currentScreen === SCREEN_WELCOME) {
+        startQuiz();
+        return;
+      }
+      if (currentScreen >= SCREEN_FIRST_Q && currentScreen <= TOTAL_QUESTIONS) {
+        const qIdx = currentScreen - 1;
+        const isLast = currentScreen === TOTAL_QUESTIONS;
+        if (isLast) submitQuiz();
+        else goNext(currentScreen);
+      }
+    }
+  });
+
+  /* ============================================================
+     INIT
+  ============================================================ */
+  buildQuestions();
+  updateProgress();
+</script>
+</body>
+</html>
