@@ -182,6 +182,7 @@ function doPost(e) {
 | 2026-03-17 | Ajuste de copy na tela de boas-vindas (título e texto de introdução) |
 | 2026-03-17 | Nova pergunta em "Sobre competidores": nomeação de 3–5 marcas concorrentes (total: 25 perguntas) |
 | 2026-03-17 | Shift+Enter para avançar (+ hint visual abaixo dos botões); botão Recomeçar; persistência de respostas via localStorage |
+| 2026-03-17 | Layout mobile: Recomeçar vira link de texto; hint + recomeçar em footer row com space-between; Anterior/Próximo sempre em 2 colunas (grid) |
 
 ### Seções
 
@@ -207,7 +208,7 @@ function doPost(e) {
 | Shift+Enter | Avança para a próxima pergunta ou envia o formulário |
 | Cmd/Ctrl+Enter | Alternativa ao Shift+Enter (mantido para compatibilidade) |
 | Hint de teclado | Texto discreto abaixo dos botões indicando o atalho |
-| Botão Recomeçar | Ícone de reload ao lado do "Próximo"; limpa localStorage e volta ao início |
+| Botão Recomeçar | Link de texto discreto (sem borda) com ícone de reload, alinhado à direita do hint; limpa localStorage e volta ao início |
 | LocalStorage | Salva respostas e tela atual automaticamente; restaura silenciosamente ao reabrir |
 | Limpeza do storage | Automática após envio bem-sucedido |
 | Chaves de storage | `guday_quiz_v1` (quiz.html) · `guday_client_survey_v1` (client-survey.html) |
