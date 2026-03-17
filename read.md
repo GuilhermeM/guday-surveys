@@ -159,10 +159,37 @@ function doPost(e) {
 | Arquivo | Descrição | Status |
 |---|---|---|
 | `Example-Customer Support Survey.pdf` | Formulário original em inglês | ✅ Concluído |
+| `Guday - Client Survey.pdf` | Questionário de cliente para CRO (original) | ✅ Concluído |
 | `survey-pt.md` | Tradução do formulário para pt-BR | ✅ Concluído |
 | `styleguide.md` | Guia de estilo visual da Guday | ✅ Concluído |
-| `quiz.html` | Quiz interativo final | ✅ Concluído |
+| `quiz.html` | Quiz de suporte — pesquisa interna com funcionários | ✅ Concluído |
+| `client-survey.html` | Quiz de cliente — onboarding CRO (24 perguntas, 4 seções) | ✅ Concluído |
 | `read.md` | Esta documentação | ✅ Concluído |
+
+---
+
+## Quiz de Cliente — client-survey.html
+
+**Público-alvo:** Clientes (onboarding CRO)
+**Fonte:** `Guday - Client Survey.pdf`
+**Perguntas:** 24, organizadas em 4 seções com telas de transição
+
+### Seções
+
+| Seção | Perguntas |
+|---|---|
+| Sobre você | 7 |
+| Sobre competidores | 4 |
+| Sobre a sua audiência | 9 |
+| Sobre seu produto | 4 |
+
+### Integração
+
+- **Apps Script implantado em:** 2026-03-17
+- **Endpoint:** `https://script.google.com/macros/s/AKfycbxLOnIzVF62r_FoWOEf9VTAdZnY0OmMbVRTYHYHUKPxf-2d3-Tc0qerWXagNO_8uM0/exec`
+- **Planilha de destino:** a definir pelo usuário
+
+---
 
 ## Decisões Técnicas
 
@@ -171,4 +198,5 @@ function doPost(e) {
 | Integração com Sheets | Google Apps Script Web App | Sem backend, sem OAuth, funciona de HTML estático |
 | Framework JS | Vanilla JS | Sem dependências, arquivo único |
 | Layout | Typeform-inspired | Uma pergunta por vez, experiência fluida |
-| Público | Funcionários Guday | Tom interno, profissional e acessível |
+| Público quiz.html | Funcionários Guday | Tom interno, profissional e acessível |
+| Público client-survey.html | Clientes (onboarding CRO) | Tom consultivo, seções temáticas com transições |
