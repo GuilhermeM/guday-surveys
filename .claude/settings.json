@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:guday.com.br)",
+      "Bash(vercel --version)",
+      "Bash(vercel whoami:*)",
+      "Bash(git add:*)"
+    ],
+    "additionalDirectories": [
+      "/Users/guilhermemiguel/Documents/_GUDAY/SURVEYS"
+    ]
+  }
+}
