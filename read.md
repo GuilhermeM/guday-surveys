@@ -181,6 +181,7 @@ function doPost(e) {
 | 2026-03-17 | Criação inicial — 24 perguntas, 4 seções, integração com Sheets |
 | 2026-03-17 | Ajuste de copy na tela de boas-vindas (título e texto de introdução) |
 | 2026-03-17 | Nova pergunta em "Sobre competidores": nomeação de 3–5 marcas concorrentes (total: 25 perguntas) |
+| 2026-03-17 | Shift+Enter para avançar (+ hint visual abaixo dos botões); botão Recomeçar; persistência de respostas via localStorage |
 
 ### Seções
 
@@ -199,6 +200,20 @@ function doPost(e) {
 
 ---
 
+## Funcionalidades Comuns (quiz.html e client-survey.html)
+
+| Funcionalidade | Detalhe |
+|---|---|
+| Shift+Enter | Avança para a próxima pergunta ou envia o formulário |
+| Cmd/Ctrl+Enter | Alternativa ao Shift+Enter (mantido para compatibilidade) |
+| Hint de teclado | Texto discreto abaixo dos botões indicando o atalho |
+| Botão Recomeçar | Ícone de reload ao lado do "Próximo"; limpa localStorage e volta ao início |
+| LocalStorage | Salva respostas e tela atual automaticamente; restaura silenciosamente ao reabrir |
+| Limpeza do storage | Automática após envio bem-sucedido |
+| Chaves de storage | `guday_quiz_v1` (quiz.html) · `guday_client_survey_v1` (client-survey.html) |
+
+---
+
 ## Decisões Técnicas
 
 | Decisão | Escolha | Motivo |
@@ -208,3 +223,5 @@ function doPost(e) {
 | Layout | Typeform-inspired | Uma pergunta por vez, experiência fluida |
 | Público quiz.html | Funcionários Guday | Tom interno, profissional e acessível |
 | Público client-survey.html | Clientes (onboarding CRO) | Tom consultivo, seções temáticas com transições |
+| Persistência | localStorage | Sem backend, retomada silenciosa sem fricção |
+| Atalho de teclado | Shift+Enter | Mais natural em formulários de texto do que Cmd+Enter |

@@ -389,6 +389,26 @@
       color: var(--purple);
     }
 
+    .btn-reset {
+      opacity: 0.6;
+      font-size: 0.8rem;
+      padding: 0.75rem 1.25rem;
+      margin-left: auto;
+    }
+
+    .btn-reset:hover {
+      opacity: 1;
+    }
+
+    .keyboard-hint {
+      display: block;
+      font-size: 0.68rem;
+      color: var(--muted);
+      opacity: 0.5;
+      margin-top: 0.6rem;
+      letter-spacing: 0.02em;
+    }
+
     /* ============================================================
        WELCOME SCREEN
     ============================================================ */
@@ -983,7 +1003,12 @@
               ${isLastQuestion ? 'Enviar' : 'Próximo'}
               ${isLastQuestion ? '' : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`}
             </button>
+            <button class="btn btn-secondary btn-reset" onclick="resetQuiz()" title="Apagar respostas e recomeçar">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              Recomeçar
+            </button>
           </div>
+          <span class="keyboard-hint">Shift+Enter para avançar</span>
         </div>
       `;
 
@@ -1014,6 +1039,7 @@
 
     next.classList.add('active');
     currentFlow = nextFlowIdx;
+    saveToStorage();
     updateProgress();
     updateCounter();
 
@@ -1109,6 +1135,7 @@
   async function sendToSheets(data) {
     if (!SHEETS_ENDPOINT || SHEETS_ENDPOINT === 'COLE_AQUI_A_URL_DO_APPS_SCRIPT') {
       console.warn('[Guday Client Survey] SHEETS_ENDPOINT não configurado. Respostas:', data);
+      clearStorage();
       const thanksFlowIdx = FLOW.findIndex(f => f.type === 'thanks');
       navigateFlow(thanksFlowIdx, 'forward');
       document.getElementById('counter').style.display = 'none';
@@ -1123,6 +1150,7 @@
       });
       const json = await res.json();
       if (json.status === 'ok') {
+        clearStorage();
         const thanksFlowIdx = FLOW.findIndex(f => f.type === 'thanks');
         navigateFlow(thanksFlowIdx, 'forward');
         document.getElementById('counter').style.display = 'none';
@@ -1188,10 +1216,85 @@
   }
 
   /* ============================================================
+     LOCAL STORAGE
+  ============================================================ */
+  const STORAGE_KEY = 'guday_client_survey_v1';
+
+  function saveToStorage() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ flow: currentFlow, answers }));
+    } catch(e) {}
+  }
+
+  function clearStorage() {
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  }
+
+  function restoreAnswers() {
+    QUESTIONS.forEach(q => {
+      if (!answers[q.id]) return;
+      if (q.type === 'textarea') {
+        const el = document.getElementById(`field-${q.id}`);
+        if (el) { el.value = answers[q.id]; autoResize(el); }
+      } else if (q.type === 'radio') {
+        const el = document.querySelector(`input[name="${q.id}"][value="${answers[q.id]}"]`);
+        if (el) {
+          el.checked = true;
+          el.closest('.option-label').classList.add('selected');
+        }
+      }
+    });
+  }
+
+  function loadFromStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (!data.answers || data.flow == null) return;
+      const entry = FLOW[data.flow];
+      if (!entry || entry.type === 'welcome' || entry.type === 'thanks' || entry.type === 'error') return;
+
+      answers = data.answers;
+      restoreAnswers();
+
+      document.getElementById('screen-welcome').classList.remove('active');
+      currentFlow = data.flow;
+      getScreenEl(currentFlow).classList.add('active');
+      document.getElementById('counter').style.display = 'block';
+      updateProgress();
+      updateCounter();
+    } catch(e) {}
+  }
+
+  function resetQuiz() {
+    clearStorage();
+    answers = {};
+    QUESTIONS.forEach(q => {
+      if (q.type === 'textarea') {
+        const el = document.getElementById(`field-${q.id}`);
+        if (el) { el.value = ''; el.style.height = ''; el.classList.remove('error'); }
+      } else if (q.type === 'radio') {
+        document.querySelectorAll(`input[name="${q.id}"]`).forEach(r => r.checked = false);
+        document.querySelectorAll(`#field-${q.id} .option-label`).forEach(l => l.classList.remove('selected'));
+      }
+      const errEl = document.getElementById(`err-${q.id}`);
+      if (errEl) errEl.classList.remove('visible');
+    });
+    const current = getScreenEl(currentFlow);
+    if (current) current.classList.remove('active');
+    currentFlow = 0;
+    document.getElementById('screen-welcome').classList.add('active');
+    document.getElementById('counter').style.display = 'none';
+    updateProgress();
+    updateCounter();
+  }
+
+  /* ============================================================
      KEYBOARD NAVIGATION
   ============================================================ */
   document.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+    if (e.key === 'Enter' && (e.shiftKey || e.metaKey || e.ctrlKey)) {
       const entry = FLOW[currentFlow];
       if (!entry) return;
 
@@ -1218,6 +1321,7 @@
   buildSectionScreens();
   buildQuestions();
   updateProgress();
+  loadFromStorage();
 </script>
 </body>
 </html>
