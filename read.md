@@ -164,6 +164,8 @@ function doPost(e) {
 | `styleguide.md` | Guia de estilo visual da Guday | ✅ Concluído |
 | `quiz.html` | Quiz de suporte — pesquisa interna com funcionários | ✅ Concluído |
 | `client-survey.html` | Quiz de cliente — onboarding CRO (24 perguntas, 4 seções) | ✅ Concluído |
+| `post-purchase.html` | Pesquisa pós-compra — 14 perguntas, fluxo direto sem seções | ✅ Concluído |
+| `post-purchase questions` | Perguntas-base da pesquisa pós-compra (adaptadas para Guday) | ✅ Concluído |
 | `read.md` | Esta documentação | ✅ Concluído |
 
 ---
@@ -201,7 +203,46 @@ function doPost(e) {
 
 ---
 
-## Funcionalidades Comuns (quiz.html e client-survey.html)
+## Pesquisa Pós-Compra — post-purchase.html
+
+**Público-alvo:** Clientes que acabaram de comprar na Guday
+**Fonte:** `post-purchase questions` (adaptado de modelo Mynd Mushrooms para o contexto de gummy de creatina)
+**Perguntas:** 14, fluxo direto sem separação por seções
+
+### Perguntas
+
+| # | Pergunta | Tipo |
+|---|---|---|
+| 1 | Qual é o seu gênero? | Radio (Feminino, Masculino, Não-binário/Outro, Prefiro não responder) |
+| 2 | Qual é a sua faixa etária? | Radio (6 faixas) |
+| 3 | Como você conheceu a Guday pela primeira vez? | Radio (8 opções incl. TikTok Shop, influenciador) |
+| 4 | O que despertou seu interesse na Guday? | Texto livre |
+| 5 | Quais foram os 3 principais fatores que te convenceram a comprar? | Texto livre |
+| 6 | Qual era o seu maior medo ou preocupação antes de comprar? | Texto livre |
+| 7 | Houve algo que quase te fez desistir da compra? | Texto livre |
+| 8 | Quão fácil foi encontrar o que procurava no site? | Escala 0–10 |
+| 9 | O que poderíamos ter feito para facilitar sua decisão? | Texto livre (opcional) |
+| 10 | Maior desafio ao procurar suplemento de creatina ideal? | Texto livre |
+| 11 | Novos sabores de gummy que gostaria? | Checkbox (até 3) |
+| 12 | Próximo suplemento em formato gummy? | Checkbox (até 3) |
+| 13 | Probabilidade de recomendar a Guday (NPS)? | Escala 0–10 |
+| 14 | Como descreveria a Guday para um amigo? | Texto livre |
+
+### Características
+
+- Fluxo direto (sem telas de transição de seção)
+- Auto-avanço ao selecionar opção em perguntas radio e NPS (350ms delay)
+- Perguntas abertas sem hints sugestivos (para não enviesar respostas)
+- Scroll habilitado para telas com muitas opções
+
+### Integração
+
+- **Endpoint:** a configurar (variável `SHEETS_ENDPOINT` no topo do JS)
+- **Chave localStorage:** `guday_post_purchase_v1`
+
+---
+
+## Funcionalidades Comuns (quiz.html, client-survey.html e post-purchase.html)
 
 | Funcionalidade | Detalhe |
 |---|---|
@@ -211,7 +252,7 @@ function doPost(e) {
 | Botão Recomeçar | Link de texto discreto (sem borda) com ícone de reload, alinhado à direita do hint; limpa localStorage e volta ao início |
 | LocalStorage | Salva respostas e tela atual automaticamente; restaura silenciosamente ao reabrir |
 | Limpeza do storage | Automática após envio bem-sucedido |
-| Chaves de storage | `guday_quiz_v1` (quiz.html) · `guday_client_survey_v1` (client-survey.html) |
+| Chaves de storage | `guday_quiz_v1` (quiz.html) · `guday_client_survey_v1` (client-survey.html) · `guday_post_purchase_v1` (post-purchase.html) |
 
 ---
 
@@ -224,5 +265,70 @@ function doPost(e) {
 | Layout | Typeform-inspired | Uma pergunta por vez, experiência fluida |
 | Público quiz.html | Funcionários Guday | Tom interno, profissional e acessível |
 | Público client-survey.html | Clientes (onboarding CRO) | Tom consultivo, seções temáticas com transições |
+| Público post-purchase.html | Clientes pós-compra | Tom casual, fluxo rápido sem seções, auto-avanço |
 | Persistência | localStorage | Sem backend, retomada silenciosa sem fricção |
 | Atalho de teclado | Shift+Enter | Mais natural em formulários de texto do que Cmd+Enter |
+
+---
+
+## Cupom TikTok Shop → Shopify
+
+**Objetivo:** Clientes que compram na TikTok Shop recebem um QR code na embalagem. Ao escanear, chegam a uma landing page onde preenchem seus dados e resgatam um cupom de produto grátis para usar na próxima compra acima de R$199 na Guday.
+
+**URL da landing page:** https://cupom-guday.vercel.app
+
+### Arquitetura
+
+```
+QR Code (embalagem) → cupom-guday.vercel.app → Form (nome/email/telefone/CPF)
+  → API /api/resgatar → Supabase valida CPF + resgata código
+  → Código exibido na tela
+```
+
+### Stack
+
+| Camada | Tecnologia |
+|---|---|
+| Landing page | HTML vanilla — mesmo estilo Guday (Plus Jakarta Sans, paleta roxa) |
+| API | Vercel Serverless Function (`api/resgatar.js`) |
+| Banco | Supabase — tabelas `cupons` e `resgates` |
+| Cupons | Shopify Admin API (GraphQL) — desconto KEE3AFXW1AQY |
+| App Shopify | "Cupom Tiktok" — client_id `0df096d04e5aa88fbbc3bbc75443dd77` |
+
+### Credenciais e IDs
+
+| Item | Valor |
+|---|---|
+| Loja Shopify | `gummy-creatine.myshopify.com` |
+| Access Token Shopify | `(removido — consultar variáveis de ambiente)` |
+| Discount Node ID | `gid://shopify/DiscountCodeNode/1843691356469` |
+| Supabase URL | `https://yhwzhvzomooselnbcota.supabase.co` |
+| Supabase Project | `yhwzhvzomooselnbcota` |
+
+### Controle de unicidade (dupla camada)
+
+1. **Supabase** — CPF hasheado (SHA-256) na tabela `resgates`. Um CPF só pode resgatar uma vez, independente de e-mail ou dispositivo.
+2. **Shopify** — cada código `TIKTOK-*` tem uso único. Mesmo que alguém descubra um código, funciona uma única vez no checkout.
+
+### Arquivos do projeto
+
+| Arquivo | Localização |
+|---|---|
+| Landing page | `~/cupom-tiktok/landing/index.html` |
+| API serverless | `~/cupom-tiktok/landing/api/resgatar.js` |
+| Script gerador de códigos | `~/cupom-tiktok/cupom-tiktok/gerar-codigos.mjs` |
+| App config Shopify | `~/cupom-tiktok/cupom-tiktok/shopify.app.toml` |
+| Documentação original | `cupom-code-documentation.md` (neste repo) |
+
+### Status dos códigos (2026-03-18)
+
+- **5 códigos de teste** gerados (TIKTOK-21ADD7D0, TIKTOK-7AD81078, TIKTOK-8C49AFB6, TIKTOK-96831E8F, TIKTOK-ABABA840)
+- **500 códigos definitivos** gerados e salvos no Shopify + Supabase
+- Para gerar mais: editar `TOTAL_CODES` em `gerar-codigos.mjs` e rodar `node gerar-codigos.mjs`
+
+### Próximos passos
+
+- [ ] Rodar `shopify app deploy` para atualizar a URL do app (example.com → cupom-guday.vercel.app)
+- [ ] Deletar os 5 códigos de teste no Shopify (opcional)
+- [ ] Gerar e imprimir o QR Code apontando para https://cupom-guday.vercel.app
+- [ ] Testar fluxo completo com CPF real
