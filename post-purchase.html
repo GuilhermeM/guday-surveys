@@ -940,11 +940,13 @@
       current.classList.remove('exit-up', 'exit-down');
     }, 400);
 
+    next.scrollTop = 0;
     next.classList.add('active');
     currentFlow = nextFlowIdx;
     saveToStorage();
     updateProgress();
     updateCounter();
+    window.scrollTo(0, 0);
 
     const ta = next.querySelector('textarea');
     if (ta) setTimeout(() => ta.focus(), 420);
