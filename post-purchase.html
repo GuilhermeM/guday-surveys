@@ -653,7 +653,8 @@
   /* ============================================================
      CONFIGURACAO
   ============================================================ */
-  const SHEETS_ENDPOINT = 'COLE_AQUI_A_URL_DO_APPS_SCRIPT';
+  const SUPABASE_URL = 'https://ztpjbnoxyvsqirjnjwsn.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_c_ADzVTsXWAujUEBkkbLMQ_3qGIeHWe';
 
   /* ============================================================
      SECOES E PERGUNTAS
@@ -1093,19 +1094,19 @@
     btn.classList.add('loading');
     btn.textContent = 'Enviando';
 
-    await sendToSheets(answers);
+    await sendToSupabase(answers);
   }
 
   async function retrySubmit() {
     if (!lastAnswersForRetry) return;
     const thanksFlowIdx = FLOW.findIndex(f => f.type === 'thanks');
     navigateFlow(thanksFlowIdx, 'forward');
-    await sendToSheets(lastAnswersForRetry);
+    await sendToSupabase(lastAnswersForRetry);
   }
 
-  async function sendToSheets(data) {
-    if (!SHEETS_ENDPOINT || SHEETS_ENDPOINT === 'COLE_AQUI_A_URL_DO_APPS_SCRIPT') {
-      console.warn('[Guday Post-Purchase] SHEETS_ENDPOINT não configurado. Respostas:', data);
+  async function sendToSupabase(data) {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      console.warn('[Guday Post-Purchase] Supabase não configurado. Respostas:', data);
       clearStorage();
       const thanksFlowIdx = FLOW.findIndex(f => f.type === 'thanks');
       navigateFlow(thanksFlowIdx, 'forward');
@@ -1114,19 +1115,24 @@
     }
 
     try {
-      const res = await fetch(SHEETS_ENDPOINT, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/post_purchase_responses`, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Prefer': 'return=minimal',
+        },
         body: JSON.stringify(data),
       });
-      const json = await res.json();
-      if (json.status === 'ok') {
+      if (res.ok) {
         clearStorage();
         const thanksFlowIdx = FLOW.findIndex(f => f.type === 'thanks');
         navigateFlow(thanksFlowIdx, 'forward');
         document.getElementById('counter').style.display = 'none';
       } else {
-        throw new Error('Status inesperado');
+        const err = await res.text();
+        throw new Error(err);
       }
     } catch (err) {
       console.error('[Guday Post-Purchase] Erro ao enviar:', err);
