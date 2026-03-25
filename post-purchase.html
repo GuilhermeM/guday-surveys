@@ -1040,14 +1040,17 @@
   /* ============================================================
      INTERACTIONS
   ============================================================ */
+  let _selectingOption = false;
   function selectOption(qId, idx, label, qIdx) {
+    if (_selectingOption) return;
+    _selectingOption = true;
     const container = document.getElementById(`field-${qId}`);
     container.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
     label.classList.add('selected');
     label.querySelector('input').checked = true;
     document.getElementById(`err-${qId}`).classList.remove('visible');
     const isLast = qIdx === QUESTIONS.length - 1;
-    setTimeout(() => isLast ? submitQuiz() : goNextQuestion(qIdx), 350);
+    setTimeout(() => { _selectingOption = false; isLast ? submitQuiz() : goNextQuestion(qIdx); }, 350);
   }
 
   function toggleCheckbox(qId, idx, label, maxSelect) {
