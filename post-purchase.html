@@ -521,6 +521,70 @@
       line-height: 1.7;
     }
 
+    .coupon-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin: 1.5rem auto;
+      padding: 1rem 1.5rem;
+      border: 2px dashed var(--purple);
+      border-radius: 12px;
+      background: #F5F0FD;
+      max-width: 360px;
+    }
+
+    .coupon-code {
+      font-family: var(--font);
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: var(--purple-dark);
+    }
+
+    .coupon-copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.45rem 0.85rem;
+      border: 1.5px solid var(--purple);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--purple);
+      font-family: var(--font);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .coupon-copy-btn:hover {
+      background: var(--purple);
+      color: var(--white);
+    }
+
+    .coupon-copy-btn.copied {
+      background: var(--lime);
+      border-color: var(--lime);
+      color: var(--dark);
+    }
+
+    .btn-site {
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.85rem 2rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-site:hover {
+      background: var(--purple-dark);
+      transform: translateY(-2px);
+    }
+
     /* ============================================================
        ERROR SCREEN
     ============================================================ */
@@ -644,7 +708,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="content">
       <div class="thanks-icon">&#10003;</div>
       <h2>Valeu demais!</h2>
-      <p>Suas respostas foram enviadas com sucesso.<br/>Elas vão nos ajudar a criar uma experiência ainda melhor pra você.</p>
+      <p>Suas respostas foram enviadas com sucesso.<br/><br>Como presente estamos te dando 15% de desconto para a próxima compra no site da Guday:</p>
+      <div class="coupon-box">
+        <span class="coupon-code" id="coupon-code">pesquisa15</span>
+        <button class="coupon-copy-btn" id="coupon-copy-btn" onclick="copyCoupon()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span id="copy-label">Copiar</span>
+        </button>
+      </div>
+      <a href="https://guday.com.br/" target="_blank" rel="noopener" class="btn-primary btn-site">Ir para o site da Guday</a>
     </div>
   </div>
 
@@ -1260,6 +1332,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
     }
   });
+
+  /* ============================================================
+     COUPON COPY
+  ============================================================ */
+  function copyCoupon() {
+    const code = document.getElementById('coupon-code').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = document.getElementById('coupon-copy-btn');
+      const label = document.getElementById('copy-label');
+      btn.classList.add('copied');
+      label.textContent = 'Copiado!';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        label.textContent = 'Copiar';
+      }, 2000);
+    });
+  }
 
   /* ============================================================
      INIT
