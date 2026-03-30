@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guday — Abrir Ticket de TI</title>
+  <link rel="shortcut icon" href="https://guday.com.br/cdn/shop/files/fav-icon.svg?crop=center&height=32&v=1691816723&width=32" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       VARIABLES
+    ============================================================ */
+    :root {
+      --purple:      #B282EB;
+      --purple-dark: #9965D8;
+      --purple-soft: #A78CEB;
+      --lime:        #C5FF89;
+      --dark:        #1E192A;
+      --muted:       #6D6DAA;
+      --bg:          #FAFAF2;
+      --white:       #ffffff;
+      --error:       #BE123C;
+      --error-bg:    #FFF1F2;
+      --border:      #DDD8F0;
+
+      --font: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --radius-btn: 0.5rem;
+      --radius-input: 0.75rem;
+      --shadow-btn: 0 6px 0 rgba(130, 80, 200, 0.25);
+      --transition: 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--dark);
+    }
+
+    /* ============================================================
+       LOGO
+    ============================================================ */
+    #logo-wrap {
+      position: fixed;
+      top: 1.25rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+    }
+
+    #logo-wrap img {
+      height: 48px;
+      width: auto;
+      display: block;
+    }
+
+    /* ============================================================
+       MAIN LAYOUT
+    ============================================================ */
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 6.5rem 1.5rem 4rem;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 640px;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       HEADER
+    ============================================================ */
+    .form-badge {
+      display: inline-block;
+      background: var(--lime);
+      color: var(--dark);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.9rem;
+      border-radius: 99px;
+      margin-bottom: 1rem;
+    }
+
+    .form-title {
+      font-size: clamp(1.5rem, 4vw, 2.25rem);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+      color: var(--dark);
+    }
+
+    .form-title span {
+      color: var(--purple);
+    }
+
+    .form-subtitle {
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ============================================================
+       FORM FIELDS
+    ============================================================ */
+    .field-group {
+      margin-bottom: 1.75rem;
+    }
+
+    .field-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .field-label .required {
+      color: var(--purple);
+      font-weight: 700;
+    }
+
+    .field-label svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--purple);
+      flex-shrink: 0;
+    }
+
+    /* Text input */
+    input[type="text"],
+    input[type="url"] {
+      width: 100%;
+      padding: 0.85rem 1.25rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-input);
+      font-family: var(--font);
+      font-size: 0.95rem;
+      color: var(--dark);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"]:focus,
+    input[type="url"]:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 4px rgba(178, 130, 235, 0.15);
+    }
+
+    input[type="text"].error,
+    input[type="url"].error {
+      border-color: var(--error);
+      box-shadow: 0 0 0 4px rgba(190, 18, 60, 0.1);
+    }
+
+    /* Textarea */
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-input);
+      padding: 1rem 1.25rem;
+      font-family: var(--font);
+      font-size: 0.95rem;
+      color: var(--dark);
+      background: var(--white);
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      line-height: 1.6;
+      overflow: hidden;
+    }
+
+    textarea:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 4px rgba(178, 130, 235, 0.15);
+    }
+
+    textarea.error {
+      border-color: var(--error);
+      box-shadow: 0 0 0 4px rgba(190, 18, 60, 0.1);
+    }
+
+    /* Radio / pill options */
+    .options-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .pill-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.1rem;
+      border: 2px solid var(--border);
+      border-radius: 99px;
+      cursor: pointer;
+      background: var(--white);
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--dark);
+      user-select: none;
+    }
+
+    .pill-label:hover {
+      border-color: var(--purple);
+      background: #F5F0FD;
+    }
+
+    .pill-label input[type="radio"] {
+      display: none;
+    }
+
+    .pill-label.selected {
+      border-color: var(--purple);
+      background: #F0E8FC;
+      box-shadow: 0 0 0 3px rgba(178, 130, 235, 0.12);
+      color: var(--purple-dark);
+      font-weight: 600;
+    }
+
+    /* Priority dots */
+    .priority-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .dot-urgente  { background: #DC2626; }
+    .dot-alta     { background: #F59E0B; }
+    .dot-media    { background: #3B82F6; }
+    .dot-baixa    { background: #C4C4C4; }
+
+    /* Error message */
+    .field-error {
+      color: var(--error);
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    .field-error.visible {
+      display: block;
+    }
+
+    /* ============================================================
+       DROP ZONE
+    ============================================================ */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-input);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      background: var(--white);
+      position: relative;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--purple);
+      background: #F5F0FD;
+    }
+
+    .drop-zone-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #F0E8FC;
+      margin: 0 auto 0.75rem;
+    }
+
+    .drop-zone-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--purple);
+    }
+
+    .drop-zone-text {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .drop-zone-text strong {
+      color: var(--purple);
+      cursor: pointer;
+    }
+
+    .drop-zone-hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+      opacity: 0.6;
+      margin-top: 0.35rem;
+    }
+
+    .drop-zone input[type="file"] {
+      display: none;
+    }
+
+    /* Preview */
+    .preview-area {
+      margin-top: 0.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .preview-item {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      border: 2px solid var(--border);
+    }
+
+    .preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .preview-remove {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--error);
+      color: var(--white);
+      border: none;
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    /* ============================================================
+       SUBMIT BUTTON
+    ============================================================ */
+    .submit-row {
+      margin-top: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .submit-hint {
+      font-size: 0.8rem;
+      color: var(--muted);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      text-align: center;
+    }
+
+    .submit-hint.visible {
+      opacity: 1;
+    }
+
+    .btn {
+      padding: 0.85rem 2.5rem;
+      border-radius: var(--radius-btn);
+      border: none;
+      font-family: var(--font);
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--purple);
+      color: var(--white);
+      box-shadow: var(--shadow-btn);
+    }
+
+    .btn-primary:hover {
+      background: var(--purple-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 rgba(130, 80, 200, 0.25);
+    }
+
+    .btn-primary:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 rgba(130, 80, 200, 0.25);
+    }
+
+    .btn-primary.loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .btn-primary.loading::after {
+      content: '';
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ============================================================
+       SUCCESS SCREEN
+    ============================================================ */
+    .success-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    .success-overlay.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .success-icon {
+      width: 72px;
+      height: 72px;
+      background: var(--lime);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+    }
+
+    .success-overlay h2 {
+      font-size: clamp(1.5rem, 4vw, 2.25rem);
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      text-align: center;
+    }
+
+    .success-overlay p {
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+      text-align: center;
+      max-width: 460px;
+    }
+
+    .btn-new-ticket {
+      margin-top: 2rem;
+      background: transparent;
+      color: var(--purple);
+      border: 2px solid var(--purple);
+      padding: 0.75rem 2rem;
+      border-radius: var(--radius-btn);
+      font-family: var(--font);
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .btn-new-ticket:hover {
+      background: var(--purple);
+      color: var(--white);
+    }
+
+    /* ============================================================
+       ERROR TOAST
+    ============================================================ */
+    .error-toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--error);
+      color: var(--white);
+      padding: 0.85rem 1.5rem;
+      border-radius: 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      z-index: 300;
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      text-align: center;
+      max-width: 90%;
+    }
+
+    .error-toast.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media (max-width: 480px) {
+      .page { padding: 5rem 1.25rem 3rem; }
+      .options-row { gap: 0.4rem; }
+      .pill-label { padding: 0.55rem 0.9rem; font-size: 0.8rem; }
+      .preview-item { width: 64px; height: 64px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     LOGO
+============================================================ -->
+<div id="logo-wrap">
+  <img src="https://guday.com.br/cdn/shop/files/logo-roxo.svg?v=1723934986&width=450" alt="Guday" />
+</div>
+
+<!-- ============================================================
+     FORM
+============================================================ -->
+<div class="page" id="page-form">
+  <div class="card">
+    <div class="form-badge">Ticket de TI</div>
+    <h1 class="form-title">Abrir um <span>novo ticket</span></h1>
+    <p class="form-subtitle">Registre bugs, pedidos de alteração ou ideias para o site. Quanto mais detalhado, mais rápido o time de TI resolve.</p>
+
+    <form id="ticket-form" novalidate>
+
+      <!-- Nome do colaborador -->
+      <div class="field-group">
+        <label class="field-label" for="field-nome">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Nome do colaborador <span class="required">*</span>
+        </label>
+        <input type="text" id="field-nome" placeholder="Seu nome completo" />
+        <div class="field-error" id="err-nome">Por favor, informe seu nome.</div>
+      </div>
+
+      <!-- Tipo de incidente -->
+      <div class="field-group">
+        <label class="field-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          Tipo de incidente <span class="required">*</span>
+        </label>
+        <div class="options-row" id="field-tipo">
+          <label class="pill-label" onclick="selectPill('tipo', this)">
+            <input type="radio" name="tipo" value="Bug" />Bug
+          </label>
+          <label class="pill-label" onclick="selectPill('tipo', this)">
+            <input type="radio" name="tipo" value="Alteração" />Alteração
+          </label>
+          <label class="pill-label" onclick="selectPill('tipo', this)">
+            <input type="radio" name="tipo" value="Teste A/B" />Teste A/B
+          </label>
+          <label class="pill-label" onclick="selectPill('tipo', this)">
+            <input type="radio" name="tipo" value="Ideia" />Ideia
+          </label>
+          <label class="pill-label" onclick="selectPill('tipo', this)">
+            <input type="radio" name="tipo" value="Outro" />Outro
+          </label>
+        </div>
+        <div class="field-error" id="err-tipo">Por favor, selecione o tipo de incidente.</div>
+      </div>
+
+      <!-- Prioridade -->
+      <div class="field-group">
+        <label class="field-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Prioridade <span class="required">*</span>
+        </label>
+        <div class="options-row" id="field-prioridade">
+          <label class="pill-label" onclick="selectPill('prioridade', this)">
+            <input type="radio" name="prioridade" value="Urgente" /><span class="priority-dot dot-urgente"></span>Urgente
+          </label>
+          <label class="pill-label" onclick="selectPill('prioridade', this)">
+            <input type="radio" name="prioridade" value="Alta" /><span class="priority-dot dot-alta"></span>Alta
+          </label>
+          <label class="pill-label" onclick="selectPill('prioridade', this)">
+            <input type="radio" name="prioridade" value="Média" /><span class="priority-dot dot-media"></span>Média
+          </label>
+          <label class="pill-label" onclick="selectPill('prioridade', this)">
+            <input type="radio" name="prioridade" value="Baixa" /><span class="priority-dot dot-baixa"></span>Baixa
+          </label>
+        </div>
+        <div class="field-error" id="err-prioridade">Por favor, selecione a prioridade.</div>
+      </div>
+
+      <!-- Descrição -->
+      <div class="field-group">
+        <label class="field-label" for="field-descricao">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Descrição <span class="required">*</span>
+        </label>
+        <textarea id="field-descricao" placeholder="Coloque aqui a descrição detalhada e precisa do que você precisa alterar no site" rows="5" oninput="autoResize(this)"></textarea>
+        <div class="field-error" id="err-descricao">Por favor, descreva o incidente.</div>
+      </div>
+
+      <!-- Print -->
+      <div class="field-group">
+        <label class="field-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Print / Screenshot
+        </label>
+        <div class="drop-zone" id="drop-zone">
+          <div class="drop-zone-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <div class="drop-zone-text">Arraste uma imagem aqui ou <strong>clique para selecionar</strong></div>
+          <div class="drop-zone-hint">PNG, JPG ou WEBP (max 5 MB)</div>
+          <input type="file" id="file-input" accept="image/png,image/jpeg,image/webp" multiple />
+        </div>
+        <div class="preview-area" id="preview-area"></div>
+      </div>
+
+      <!-- URL -->
+      <div class="field-group">
+        <label class="field-label" for="field-url">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          URL
+        </label>
+        <input type="url" id="field-url" placeholder="Adicione aqui a URL exata de onde você est&#225; vendo esse incidente" />
+      </div>
+
+      <!-- Submit -->
+      <div class="submit-row">
+        <button type="submit" class="btn btn-primary" id="btn-submit">
+          Enviar Ticket
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+        <div class="submit-hint" id="submit-hint">O envio está sendo processado... espere até carregar a próxima página (demora de 5–10 segundos).</div>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<!-- ============================================================
+     SUCCESS OVERLAY
+============================================================ -->
+<div class="success-overlay" id="success-overlay">
+  <div class="success-icon">&#10003;</div>
+  <h2>Ticket enviado!</h2>
+  <p>Seu ticket foi registrado com sucesso. O time de TI vai analisar e retornar em breve.</p>
+  <button class="btn-new-ticket" onclick="resetForm()">Abrir novo ticket</button>
+</div>
+
+<!-- ============================================================
+     ERROR TOAST
+============================================================ -->
+<div class="error-toast" id="error-toast">Falha ao enviar. Verifique sua conexão e tente novamente. Se o problema persistir, procure Guilherme Miguel no Slack (guilherme@guday.com.br).</div>
+
+<script>
+  /* ============================================================
+     CONFIGURACAO
+  ============================================================ */
+  const SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyiI7s9xnA3fFZCc3tRqUgmTd9CcwQt_sDyBdOENu1IqYda6IbkZsYC7KwEeyee6Tg/exec';
+
+  // Supabase Storage (bucket público "ticket-prints")
+  const SUPABASE_URL = 'https://pvjmhapqtpxmrueylcge.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_uw6ana52Ne0iFoiKxjfjfg_-WzdJ0ve';
+  const STORAGE_BUCKET = 'ticket-prints';
+
+  /* ============================================================
+     FILE HANDLING
+  ============================================================ */
+  let uploadedFiles = [];
+
+  const dropZone = document.getElementById('drop-zone');
+  const fileInput = document.getElementById('file-input');
+  const previewArea = document.getElementById('preview-area');
+
+  dropZone.addEventListener('click', () => fileInput.click());
+
+  dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+  });
+
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('dragover');
+  });
+
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files);
+  });
+
+  fileInput.addEventListener('change', () => {
+    handleFiles(fileInput.files);
+    fileInput.value = '';
+  });
+
+  function handleFiles(fileList) {
+    const MAX_SIZE = 50 * 1024 * 1024;
+    const allowed = ['image/png', 'image/jpeg', 'image/webp'];
+
+    Array.from(fileList).forEach(file => {
+      if (!allowed.includes(file.type)) return;
+      if (file.size > MAX_SIZE) return;
+      if (uploadedFiles.length >= 5) return;
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        const id = Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+        uploadedFiles.push({ id, name: file.name, data: e.target.result, file });
+        renderPreviews();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function uploadPrints() {
+    const urls = [];
+    for (const f of uploadedFiles) {
+      const ext = f.file.name.split('.').pop() || 'png';
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      try {
+        const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${path}`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': f.file.type,
+          },
+          body: f.file,
+        });
+        if (res.ok) {
+          urls.push(`${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`);
+        }
+      } catch (err) {
+        console.error('[Upload] Falha ao enviar print:', err);
+      }
+    }
+    return urls;
+  }
+
+  function renderPreviews() {
+    previewArea.innerHTML = uploadedFiles.map(f => `
+      <div class="preview-item" id="prev-${f.id}">
+        <img src="${f.data}" alt="${f.name}" />
+        <button class="preview-remove" onclick="removeFile('${f.id}')" title="Remover">&times;</button>
+      </div>
+    `).join('');
+  }
+
+  function removeFile(id) {
+    uploadedFiles = uploadedFiles.filter(f => f.id !== id);
+    renderPreviews();
+  }
+
+  /* ============================================================
+     PILL SELECT
+  ============================================================ */
+  function selectPill(name, label) {
+    const container = document.getElementById(`field-${name}`);
+    container.querySelectorAll('.pill-label').forEach(l => l.classList.remove('selected'));
+    label.classList.add('selected');
+    label.querySelector('input').checked = true;
+    document.getElementById(`err-${name}`).classList.remove('visible');
+  }
+
+  /* ============================================================
+     AUTO RESIZE TEXTAREA
+  ============================================================ */
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+
+  /* ============================================================
+     VALIDATION
+  ============================================================ */
+  function validate() {
+    let valid = true;
+
+    // Nome
+    const nome = document.getElementById('field-nome');
+    if (!nome.value.trim()) {
+      nome.classList.add('error');
+      document.getElementById('err-nome').classList.add('visible');
+      valid = false;
+    } else {
+      nome.classList.remove('error');
+      document.getElementById('err-nome').classList.remove('visible');
+    }
+
+    // Tipo
+    const tipo = document.querySelector('input[name="tipo"]:checked');
+    if (!tipo) {
+      document.getElementById('err-tipo').classList.add('visible');
+      valid = false;
+    } else {
+      document.getElementById('err-tipo').classList.remove('visible');
+    }
+
+    // Prioridade
+    const prioridade = document.querySelector('input[name="prioridade"]:checked');
+    if (!prioridade) {
+      document.getElementById('err-prioridade').classList.add('visible');
+      valid = false;
+    } else {
+      document.getElementById('err-prioridade').classList.remove('visible');
+    }
+
+    // Descrição
+    const desc = document.getElementById('field-descricao');
+    if (!desc.value.trim()) {
+      desc.classList.add('error');
+      document.getElementById('err-descricao').classList.add('visible');
+      valid = false;
+    } else {
+      desc.classList.remove('error');
+      document.getElementById('err-descricao').classList.remove('visible');
+    }
+
+    // Scroll to first error
+    if (!valid) {
+      const firstErr = document.querySelector('.field-error.visible');
+      if (firstErr) firstErr.closest('.field-group').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    return valid;
+  }
+
+  // Clear error on input
+  document.getElementById('field-nome').addEventListener('input', function() {
+    this.classList.remove('error');
+    document.getElementById('err-nome').classList.remove('visible');
+  });
+
+  document.getElementById('field-descricao').addEventListener('input', function() {
+    this.classList.remove('error');
+    document.getElementById('err-descricao').classList.remove('visible');
+  });
+
+  /* ============================================================
+     SUBMIT
+  ============================================================ */
+  document.getElementById('ticket-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (!validate()) return;
+
+    const btn = document.getElementById('btn-submit');
+    btn.classList.add('loading');
+    btn.textContent = 'Enviando';
+    document.getElementById('submit-hint').classList.add('visible');
+
+    try {
+      // Simular erro para teste: preencher nome como "bug"
+      if (document.getElementById('field-nome').value.trim().toLowerCase() === 'bug') {
+        throw new Error('Simulação de erro');
+      }
+
+      // 1. Upload prints para Supabase Storage
+      let printUrls = [];
+      if (uploadedFiles.length > 0) {
+        printUrls = await uploadPrints();
+      }
+
+      // 2. Enviar dados para Google Sheets
+      const payload = {
+        nome: document.getElementById('field-nome').value.trim(),
+        tipo: document.querySelector('input[name="tipo"]:checked').value,
+        prioridade: document.querySelector('input[name="prioridade"]:checked').value,
+        descricao: document.getElementById('field-descricao').value.trim(),
+        url: document.getElementById('field-url').value.trim(),
+        prints: printUrls,
+        created_at: new Date().toISOString(),
+      };
+
+      await fetch(SHEETS_ENDPOINT, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify(payload),
+      });
+
+      // Apps Script retorna opaque response com no-cors, mas os dados chegam
+      showSuccess();
+    } catch (err) {
+      console.error('[Guday Ticket] Erro:', err);
+      showErrorToast();
+      btn.classList.remove('loading');
+      btn.textContent = 'Enviar Ticket';
+      document.getElementById('submit-hint').classList.remove('visible');
+    }
+  });
+
+  function showSuccess() {
+    document.getElementById('success-overlay').classList.add('visible');
+  }
+
+  function showErrorToast() {
+    const toast = document.getElementById('error-toast');
+    toast.classList.add('visible');
+    setTimeout(() => toast.classList.remove('visible'), 4000);
+  }
+
+  /* ============================================================
+     RESET
+  ============================================================ */
+  function resetForm() {
+    document.getElementById('ticket-form').reset();
+    document.getElementById('field-descricao').style.height = '';
+    document.querySelectorAll('.pill-label').forEach(l => l.classList.remove('selected'));
+    document.querySelectorAll('.field-error').forEach(e => e.classList.remove('visible'));
+    document.querySelectorAll('input.error, textarea.error').forEach(e => e.classList.remove('error'));
+    uploadedFiles = [];
+    renderPreviews();
+
+    const btn = document.getElementById('btn-submit');
+    btn.classList.remove('loading');
+    btn.innerHTML = `Enviar Ticket <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`;
+
+    document.getElementById('success-overlay').classList.remove('visible');
+    window.scrollTo(0, 0);
+  }
+
+  /* ============================================================
+     PASTE IMAGE
+  ============================================================ */
+  document.addEventListener('paste', e => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    const files = [];
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        files.push(item.getAsFile());
+      }
+    }
+    if (files.length) handleFiles(files);
+  });
+</script>
+</body>
+</html>
