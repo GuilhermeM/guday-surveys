@@ -166,6 +166,8 @@ function doPost(e) {
 | `client-survey.html` | Quiz de cliente — onboarding CRO (24 perguntas, 4 seções) | ✅ Concluído |
 | `post-purchase.html` | Pesquisa pós-compra — 14 perguntas, fluxo direto sem seções | ✅ Concluído |
 | `post-purchase questions` | Perguntas-base da pesquisa pós-compra (adaptadas para Guday) | ✅ Concluído |
+| `ticket.html` | Formulário de ticket de TI — time interno Guday | ✅ Concluído |
+| `index.html` | Redirect para `post-purchase.html` | ✅ Concluído |
 | `read.md` | Esta documentação | ✅ Concluído |
 
 ---
@@ -207,7 +209,7 @@ function doPost(e) {
 
 **Público-alvo:** Clientes que acabaram de comprar na Guday
 **Fonte:** `post-purchase questions` (adaptado de modelo Mynd Mushrooms para o contexto de gummy de creatina)
-**Perguntas:** 14, fluxo direto sem separação por seções
+**Perguntas:** 12, fluxo direto sem separação por seções (foco CRO)
 
 ### Perguntas
 
@@ -223,10 +225,8 @@ function doPost(e) {
 | 8 | Quão fácil foi encontrar o que procurava no site? | Escala 0–10 |
 | 9 | O que poderíamos ter feito para facilitar sua decisão? | Texto livre (opcional) |
 | 10 | Maior desafio ao procurar suplemento de creatina ideal? | Texto livre |
-| 11 | Novos sabores de gummy que gostaria? | Checkbox (até 3) |
-| 12 | Próximo suplemento em formato gummy? | Checkbox (até 3) |
-| 13 | Probabilidade de recomendar a Guday (NPS)? | Escala 0–10 |
-| 14 | Como descreveria a Guday para um amigo? | Texto livre |
+| 11 | Probabilidade de recomendar a Guday (NPS)? | Escala 0–10 |
+| 12 | Como descreveria a Guday para um amigo? | Texto livre |
 
 ### Características
 
@@ -237,8 +237,48 @@ function doPost(e) {
 
 ### Integração
 
-- **Endpoint:** a configurar (variável `SHEETS_ENDPOINT` no topo do JS)
+- **Banco de dados:** Supabase (REST API)
+- **Projeto Supabase:** `ztpjbnoxyvsqirjnjwsn`
+- **Tabela:** `post_purchase_responses`
+- **RLS:** insert-only para `anon` (sem leitura pública)
 - **Chave localStorage:** `guday_post_purchase_v1`
+
+---
+
+## Ticket de TI — ticket.html
+
+**Público-alvo:** Time interno da Guday
+**Layout:** Formulário único (todos os campos visíveis), baseado no estilo do post-purchase.html. Logo estática no topo (não fixed/sticky).
+**Perguntas:** 6 campos, sem divisão em etapas
+
+### Campos
+
+| # | Campo | Tipo | Obrigatório |
+|---|---|---|---|
+| 1 | Nome do colaborador | Input texto | Sim |
+| 2 | Tipo de incidente | Pills (Bug, Alteração, Teste A/B, Ideia, Outro) | Sim |
+| 3 | Prioridade | Pills com dot colorido (Urgente/vermelho, Alta/laranja, Média/azul, Baixa/cinza) | Sim |
+| 4 | Descrição | Textarea auto-resize | Sim |
+| 5 | Print / Screenshot | Drop zone (drag & drop, clique, Ctrl+V paste) — até 5 imagens, max 50 MB cada | Não |
+| 6 | URL | Input URL | Não |
+
+### Características
+
+- Todos os campos visíveis em uma única tela (sem etapas)
+- Upload de imagens para Supabase Storage com links públicos
+- Validação com scroll automático para o primeiro erro
+- Toast de erro com contato do responsável (Guilherme Miguel — Slack)
+- Hint de loading abaixo do CTA durante envio
+- Tela de sucesso com opção de abrir novo ticket
+- Modo de teste: preencher nome como "bug" simula erro
+
+### Integração
+
+- **Planilha Google Sheets:** [DB - Ticket TI](https://docs.google.com/spreadsheets/d/13YBbVNSXy5ymTyYoldqsV24sI9IXCyTZPnVvwzb4sxk/edit)
+- **Apps Script endpoint:** `https://script.google.com/macros/s/AKfycbyiI7s9xnA3fFZCc3tRqUgmTd9CcwQt_sDyBdOENu1IqYda6IbkZsYC7KwEeyee6Tg/exec`
+- **Supabase projeto:** `pvjmhapqtpxmrueylcge` (Ticket - TI)
+- **Storage bucket:** `ticket-prints` (público, policy insert anon)
+- **Colunas na planilha:** ID, Timestamp, Nome, Tipo, Prioridade, Descrição, URL, Prints (links clicáveis via RichText)
 
 ---
 
@@ -260,14 +300,27 @@ function doPost(e) {
 
 | Decisão | Escolha | Motivo |
 |---|---|---|
-| Integração com Sheets | Google Apps Script Web App | Sem backend, sem OAuth, funciona de HTML estático |
+| Integração post-purchase | Supabase REST API | Mais seguro (RLS), escalável, SQL nativo |
+| Integração quiz/client | Google Apps Script Web App | Sem backend, sem OAuth, funciona de HTML estático |
 | Framework JS | Vanilla JS | Sem dependências, arquivo único |
 | Layout | Typeform-inspired | Uma pergunta por vez, experiência fluida |
 | Público quiz.html | Funcionários Guday | Tom interno, profissional e acessível |
 | Público client-survey.html | Clientes (onboarding CRO) | Tom consultivo, seções temáticas com transições |
 | Público post-purchase.html | Clientes pós-compra | Tom casual, fluxo rápido sem seções, auto-avanço |
+| Público ticket.html | Time interno Guday | Formulário único, sem etapas, foco em praticidade |
+| Integração ticket | Google Sheets + Supabase Storage | Sheets para dados, Supabase para armazenar prints com links públicos |
 | Persistência | localStorage | Sem backend, retomada silenciosa sem fricção |
 | Atalho de teclado | Shift+Enter | Mais natural em formulários de texto do que Cmd+Enter |
+
+---
+
+## Deploy
+
+- **Plataforma:** Vercel
+- **URL:** https://guday-surveys.vercel.app
+- **Repo:** `GuilhermeM/guday-surveys` (GitHub)
+- **Deploy automático:** sim — cada push na `main` publica automaticamente
+- **`index.html`** redireciona para `post-purchase.html`
 
 ---
 
