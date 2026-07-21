@@ -1,14 +1,20 @@
-* Qual é o seu gênero?
-* Qual é a sua faixa etária?
-* Como você conheceu a Guday pela primeira vez?
-* O que despertou seu interesse na Guday?
-* Quais foram os 3 principais fatores que te convenceram a comprar da Guday?
-* Qual era o seu maior medo ou preocupação antes de comprar?
-* Houve algo que quase te fez desistir da compra?
-* Quão fácil foi encontrar exatamente o que você estava procurando no nosso site?
-* O que poderíamos ter feito para tornar sua decisão de compra mais fácil?
-* Qual foi o maior desafio que você enfrentou ao procurar um suplemento de creatina ideal?
-* Quais novos sabores de gummy você gostaria que a Guday lançasse? (Escolha até 3)
-* Qual próximo suplemento você gostaria que a Guday lançasse em formato gummy? (Escolha até 3)
-* Qual a probabilidade de você recomendar a Guday para um amigo ou colega?
-* Se você fosse descrever a Guday para um amigo, o que diria?
+Guday — Pesquisa Pos-Compra (perguntas atuais)
+
+1. Qual é o seu gênero?
+2. Qual é a sua faixa etária?
+3. Você já conhecia a Guday antes desta oferta?
+4. O que mais chamou sua atenção quando você viu nosso anúncio?
+5. Quais foram os 3 principais fatores que te convenceram a comprar?
+6. Qual era o seu maior medo ou preocupação antes de comprar?
+7. Teve algo que quase te fez desistir da compra?
+8. As informações sobre o produto tiraram todas as suas dúvidas?
+9. Ficou faltando alguma informação que você queria saber antes de comprar?
+10. Quão fácil foi entender a oferta e finalizar a sua compra?
+11. Qual foi o maior desafio que você enfrentou ao procurar um suplemento ideal?
+12. Se você pudesse melhorar uma coisa na sua experiência de compra, o que seria?
+
+Total: 12 perguntas.
+
+Foco: experiencia de compra da LP, linguagem de leigo.
+Envio: Google Sheets via Apps Script (SHEET_ENDPOINT no post-purchase.html).
+Contexto por query param no link do Klaviyo: ?lp=<slug>&order=<id>&email=<email>

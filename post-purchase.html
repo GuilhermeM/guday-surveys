@@ -694,7 +694,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="welcome-badge">Pesquisa Pós-Compra</div>
       <h1>Queremos ouvir<br/><span>a sua experiência!</span></h1>
       <p>Você acabou de comprar na <b>Guday</b> e sua opinião é super importante pra gente. Responda algumas perguntas rápidas para nos ajudar a melhorar cada vez mais.</p>
-      <p class="welcome-note">Leva menos de 3 minutos e suas respostas são anônimas.</p>
+      <p class="welcome-note">Leva menos de 3 minutos.</p>
       <button class="btn btn-primary" onclick="startQuiz()">
         Começar
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -709,14 +709,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="content">
       <div class="thanks-icon">&#10003;</div>
       <h2>Valeu demais!</h2>
-      <p>Suas respostas foram enviadas com sucesso.<br/><br>Como presente estamos te dando 15% de desconto para a próxima compra no site da Guday:</p>
-      <div class="coupon-box">
-        <span class="coupon-code" id="coupon-code">pesquisa15</span>
-        <button class="coupon-copy-btn" id="coupon-copy-btn" onclick="copyCoupon()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          <span id="copy-label">Copiar</span>
-        </button>
-      </div>
+      <p>Suas respostas foram enviadas com sucesso.<br/><br>Sua opinião ajuda a gente a melhorar cada vez mais. Obrigado por fazer parte da Guday!</p>
       <a href="https://guday.com.br/" target="_blank" rel="noopener" class="btn-primary btn-site">Ir para o site da Guday</a>
     </div>
   </div>
@@ -737,8 +730,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   /* ============================================================
      CONFIGURACAO
   ============================================================ */
-  const SUPABASE_URL = 'https://ztpjbnoxyvsqirjnjwsn.supabase.co';
-  const SUPABASE_ANON_KEY = 'sb_publishable_c_ADzVTsXWAujUEBkkbLMQ_3qGIeHWe';
+  // Apps Script Web App (/exec) — mesmo padrão do form da LP Seja um Lojista.
+  const SHEET_ENDPOINT = 'COLE_AQUI_A_URL_EXEC';
+
+  // Contexto vindo do link do e-mail (Klaviyo): ?lp=lp-garrafa&order=123&email=x@y.com
+  const URL_PARAMS = new URLSearchParams(window.location.search);
+  const CONTEXT = {
+    lp_source: URL_PARAMS.get('lp')    || '',
+    order_id:  URL_PARAMS.get('order') || '',
+    email:     URL_PARAMS.get('email') || '',
+  };
 
   /* ============================================================
      SECOES E PERGUNTAS
@@ -772,50 +773,65 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     },
     {
       id: 'q2',
-      text: 'Como você conheceu a Guday pela primeira vez?',
+      text: 'Você já conhecia a Guday antes desta oferta?',
       type: 'radio',
       required: true,
       options: [
-        'Instagram',
-        'TikTok',
-        'TikTok Shop',
-        'Indicação de amigo ou familiar',
-        'Indicação de influenciador / blogueiro',
-        'Pesquisa no Google',
-        'Outro',
+        'Não, descobri a marca agora nesta oferta',
+        'Sim, já conhecia, mas foi minha primeira compra',
+        'Sim, e já tinha comprado antes',
       ],
     },
     {
-      id: 'q3',
-      text: 'O que despertou seu interesse na Guday?',
-      hint: '',
-      type: 'textarea',
-      required: true,
-    },
-    {
       id: 'q4',
-      text: 'Quais foram os 3 principais fatores que te convenceram a comprar da Guday?',
-      hint: '',
+      text: 'O que mais chamou sua atenção quando você viu nosso anúncio?',
+      hint: 'Pode ser uma imagem, um vídeo, uma frase, o preço... o que te fez querer saber mais.',
       type: 'textarea',
       required: true,
     },
     {
       id: 'q5',
-      text: 'Qual era o seu maior medo ou preocupação antes de comprar?',
+      text: 'Quais foram os 3 principais fatores que te convenceram a comprar?',
       hint: '',
       type: 'textarea',
       required: true,
     },
     {
       id: 'q6',
-      text: 'Houve algo que quase te fez desistir da compra?',
+      text: 'Qual era o seu maior medo ou preocupação antes de comprar?',
       hint: '',
       type: 'textarea',
       required: true,
     },
     {
       id: 'q7',
-      text: 'Quão fácil foi encontrar exatamente o que você estava procurando no nosso site?',
+      text: 'Teve algo que quase te fez desistir da compra?',
+      hint: 'Uma dúvida sem resposta, o preço, algo confuso, falta de informação...',
+      type: 'textarea',
+      required: true,
+    },
+    {
+      id: 'q8',
+      text: 'As informações sobre o produto tiraram todas as suas dúvidas?',
+      type: 'radio',
+      required: true,
+      options: [
+        'Sim, tirei todas as dúvidas',
+        'Na maior parte, mas ficou alguma dúvida',
+        'Não, tive que procurar em outro lugar',
+        'Não, comprei mesmo com dúvidas',
+      ],
+    },
+    {
+      id: 'q9',
+      text: 'Ficou faltando alguma informação que você queria saber antes de comprar?',
+      hint: 'Se ficou, qual? Se não, pode deixar em branco.',
+      type: 'textarea',
+      required: false,
+    },
+    {
+      id: 'q10',
+      text: 'Quão fácil foi entender a oferta e finalizar a sua compra?',
       type: 'nps',
       required: true,
       min: 0,
@@ -824,37 +840,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       maxLabel: 'Muito fácil',
     },
     {
-      id: 'q8',
-      text: 'O que poderíamos ter feito para tornar sua decisão de compra mais fácil?',
+      id: 'q11',
+      text: 'Qual foi o maior desafio que você enfrentou ao procurar um suplemento ideal?',
       hint: '',
+      type: 'textarea',
+      required: true,
+    },
+    {
+      id: 'q13',
+      text: 'Se você pudesse melhorar uma coisa na sua experiência de compra, o que seria?',
+      hint: 'Qualquer sugestão ajuda: o que ficou confuso, o que faltou ou o que daria pra deixar mais fácil.',
       type: 'textarea',
       required: false,
     },
-    {
-      id: 'q9',
-      text: 'Qual foi o maior desafio que você enfrentou ao procurar um suplemento de creatina ideal?',
-      hint: '',
-      type: 'textarea',
-      required: true,
-    },
-    {
-      id: 'q10',
-      text: 'Qual a probabilidade de você recomendar a Guday para um amigo ou colega?',
-      type: 'nps',
-      required: true,
-      min: 0,
-      max: 10,
-      minLabel: 'Nada provável',
-      maxLabel: 'Muito provável',
-    },
-    {
-      id: 'q11',
-      text: 'Se você fosse descrever a Guday para um amigo, o que diria?',
-      hint: '',
-      type: 'textarea',
-      required: true,
-    },
   ];
+
+  /* Nomes das colunas na planilha. Tem que bater com COLUMNS no Apps Script. */
+  const FIELD_NAMES = {
+    q0:  'q0_genero',
+    q1:  'q1_faixa_etaria',
+    q2:  'q2_primeiro_contato',
+    q4:  'q4_chamou_atencao',
+    q5:  'q5_fatores_convenceram',
+    q6:  'q6_maior_medo',
+    q7:  'q7_quase_desistiu',
+    q8:  'q8_duvidas_respondidas',
+    q9:  'q9_informacao_faltando',
+    q10: 'q10_facilidade_pagina',
+    q11: 'q11_maior_desafio',
+    q13: 'q13_sugestao_melhoria',
+  };
 
   /* ============================================================
      ESTADO
@@ -1146,51 +1161,59 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     btn.classList.add('loading');
     btn.textContent = 'Enviando';
 
-    await sendToSupabase(answers);
+    await sendToSheet(answers);
   }
 
   async function retrySubmit() {
     if (!lastAnswersForRetry) return;
-    const thanksFlowIdx = FLOW.findIndex(f => f.type === 'thanks');
-    navigateFlow(thanksFlowIdx, 'forward');
-    await sendToSupabase(lastAnswersForRetry);
+    await sendToSheet(lastAnswersForRetry);
   }
 
-  async function sendToSupabase(data) {
-    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-      console.warn('[Guday Post-Purchase] Supabase não configurado. Respostas:', data);
+  async function sendToSheet(data) {
+    // Monta o payload com os nomes de coluna da planilha + contexto do link
+    const payload = {
+      lp_source:  CONTEXT.lp_source,
+      order_id:   CONTEXT.order_id,
+      email:      CONTEXT.email,
+      user_agent: navigator.userAgent,
+      page_url:   window.location.href,
+    };
+    Object.keys(FIELD_NAMES).forEach(qid => {
+      payload[FIELD_NAMES[qid]] = data[qid] || '';
+    });
+
+    function goToThanks() {
       clearStorage();
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'pesquisa_pos_compra_enviada',
+        lp_source: CONTEXT.lp_source,
+      });
       const thanksFlowIdx = FLOW.findIndex(f => f.type === 'thanks');
       navigateFlow(thanksFlowIdx, 'forward');
       document.getElementById('counter').style.display = 'none';
+    }
+
+    if (!SHEET_ENDPOINT || SHEET_ENDPOINT === 'COLE_AQUI_A_URL_EXEC') {
+      console.warn('[Guday Post-Purchase] Endpoint não configurado. Respostas:', payload);
+      goToThanks();
       return;
     }
 
+    // Apps Script /exec não devolve headers CORS -> no-cors + text/plain
+    // (evita preflight; não dá pra ler a resposta, mas o appendRow grava).
+    // Por isso NUNCA caímos na tela de erro: mostramos sucesso e logamos a falha.
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/post_purchase_responses`, {
+      await fetch(SHEET_ENDPOINT, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-          'Prefer': 'return=minimal',
-        },
-        body: JSON.stringify(data),
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
       });
-      if (res.ok) {
-        clearStorage();
-        const thanksFlowIdx = FLOW.findIndex(f => f.type === 'thanks');
-        navigateFlow(thanksFlowIdx, 'forward');
-        document.getElementById('counter').style.display = 'none';
-      } else {
-        const err = await res.text();
-        throw new Error(err);
-      }
     } catch (err) {
-      console.error('[Guday Post-Purchase] Erro ao enviar:', err);
-      const errorFlowIdx = FLOW.findIndex(f => f.type === 'error');
-      navigateFlow(errorFlowIdx, 'forward');
+      console.warn('[Guday Post-Purchase] Falha ao enviar (resposta pode ter sido gravada):', err);
     }
+    goToThanks();
   }
 
   /* ============================================================
